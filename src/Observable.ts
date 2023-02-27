@@ -1,9 +1,9 @@
 export type TEventCallback<T = any> = (options: T) => any;
 
 type EventRegistryObject<
-  K extends string | number | symbol = string,
+  K extends string | number | symbol = string, // extends 限制 K 的類型
   E = any
-> = Record<K, TEventCallback<E>>;
+> = Record<K, TEventCallback<E>>; // 物件型別的泛型, {[K]: TEventCallback<E>}
 
 /**
  * @tutorial {@link http://fabricjs.com/fabric-intro-part-2#events}
@@ -30,10 +30,10 @@ export class Observable<EventSpec> {
     handler: TEventCallback<E>
   ): VoidFunction;
   on<K extends keyof EventSpec, E extends EventSpec[K]>(
-    handlers: EventRegistryObject<K, E>
+    handlers: EventRegistryObject<K, E> // see line 42, will as arg0 be recursively call on method to register
   ): VoidFunction;
   on<K extends keyof EventSpec, E extends EventSpec[K]>(
-    arg0: K | EventRegistryObject<K, E>,
+    arg0: K | EventRegistryObject<K, E>, // see line 42
     handler?: TEventCallback<E>
   ): VoidFunction {
     if (!this.__eventListeners) {
@@ -45,7 +45,7 @@ export class Observable<EventSpec> {
         this.on(eventName as K, arg0[eventName]);
       }
       return () => this.off(arg0);
-    } else if (handler) {
+    } else if (handler) { // add to observe array
       const eventName = arg0;
       if (!this.__eventListeners[eventName]) {
         this.__eventListeners[eventName] = [];
@@ -91,9 +91,9 @@ export class Observable<EventSpec> {
     } else if (handler) {
       const disposer = this.on<K, E>(arg0, (...args) => {
         handler(...args);
-        disposer();
+        disposer(); // this.on will invoked this params callback, then automatic call this disposer will invoked this.off method
       });
-      return disposer;
+      return disposer; // this is a callback will invoked this.off method again
     } else {
       // noop
       return () => false;
@@ -164,13 +164,14 @@ export class Observable<EventSpec> {
   /**
    * Fires event with an optional options object
    * @param {String} eventName Event name to fire
-   * @param {Object} [options] Options object
+   * @param {Object} [options] Options object be passed to handler callback
    */
   fire<K extends keyof EventSpec>(eventName: K, options?: EventSpec[K]) {
     if (!this.__eventListeners) {
       return;
     }
 
+    // ?.concat for check array of listener is exists
     const listenersForEvent = this.__eventListeners[eventName]?.concat();
     if (listenersForEvent) {
       for (let i = 0; i < listenersForEvent.length; i++) {
