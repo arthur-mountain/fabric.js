@@ -3,6 +3,9 @@ import type { BaseFabricObject } from './EventTypeDefs';
 import { removeFromArray } from './util/internals';
 import { Point } from './Point';
 
+// 用於給 主canvas 繼承的class
+// 用來儲存 all of object 的集合
+// some method 可以被主canvas繼承後覆寫
 export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
   class Collection extends Base {
     /**
@@ -316,8 +319,8 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
       { includeIntersecting = true }: { includeIntersecting?: boolean } = {}
     ) {
       const objects: BaseFabricObject[] = [],
-        tl = new Point(left, top),
-        br = tl.add(new Point(width, height));
+        tl = new Point(left, top), // point object(左上的座標)
+        br = tl.add(new Point(width, height)); // 新的 point object(右下的座標)
 
       // we iterate reverse order to collect top first in case of click.
       for (let i = this._objects.length - 1; i >= 0; i--) {
@@ -325,11 +328,12 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
         if (
           object.selectable &&
           object.visible &&
-          ((includeIntersecting && object.intersectsWithRect(tl, br, true)) ||
-            object.isContainedWithinRect(tl, br, true) ||
-            (includeIntersecting &&
-              object.containsPoint(tl, undefined, true)) ||
-            (includeIntersecting && object.containsPoint(br, undefined, true)))
+          (
+            (includeIntersecting && object.intersectsWithRect(tl, br, true)) ||
+            (object.isContainedWithinRect(tl, br, true)) ||
+            (includeIntersecting && object.containsPoint(tl, undefined, true)) ||
+            (includeIntersecting && object.containsPoint(br, undefined, true))
+          )
         ) {
           objects.push(object);
         }

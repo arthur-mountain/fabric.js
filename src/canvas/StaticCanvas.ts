@@ -94,6 +94,18 @@ export const StaticCanvasDefaults = {
  * @fires object:removed
  */
 // TODO: fix `EventSpec` inheritance https://github.com/microsoft/TypeScript/issues/26154#issuecomment-1366616260
+
+/**
+ * prototype chain of `StaticCanvas class` extends
+ *  (StaticCanvas -> Collection -> CommonMethods -> Observable)
+*/
+/**
+ * prototype chain of `StaticFabricObject class` extends
+ *  (StaticFabricObject -> AnimatableObject -> StackedObject -> ObjectGeometry-> ObjectOrigin -> CommonMethods -> Observable)
+ * 
+ * P.S. StaticFabricObject is BaseFabricObject as FabricObject
+ */
+
 export class StaticCanvas<
   EventSpec extends StaticCanvasEvents = StaticCanvasEvents
 > extends createCollectionMixin(CommonMethods<CanvasEvents>) {
@@ -348,10 +360,12 @@ export class StaticCanvas<
       /* _DEV_MODE_END_ */
       obj.canvas.remove(obj);
     }
+    // CURRENT
+    // NOTE: obj._set || this._set?
     obj._set('canvas', this);
     obj.setCoords();
-    this.fire('object:added', { target: obj });
-    obj.fire('added', { target: this });
+    this.fire('object:added', { target: obj }); // fire object event
+    obj.fire('added', { target: this }); // fire canvas event
   }
 
   _onObjectRemoved(obj: FabricObject) {
