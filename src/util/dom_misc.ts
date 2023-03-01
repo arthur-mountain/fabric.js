@@ -61,9 +61,9 @@ export function getScrollLeftTop(element: HTMLElement) {
  * @return {Object} Object with "left" and "top" properties
  */
 export function getElementOffset(element: HTMLElement) {
-  let box = { left: 0, top: 0 };
+  let box = { left: 0, top: 0 }; // box of element offset
   const doc = element && element.ownerDocument,
-    offset = { left: 0, top: 0 },
+    offset = { left: 0, top: 0 }, // window offset
     offsetAttributes = {
       borderLeftWidth: 'left',
       borderTopWidth: 'top',
@@ -75,16 +75,20 @@ export function getElementOffset(element: HTMLElement) {
     return offset;
   }
   const elemStyle = getDocument().defaultView!.getComputedStyle(element, null);
+  
+  // borderLeft + paddingLeft eq to offset.left;
+  // borderTop + paddingTop eq to offset.top;
   for (const attr in offsetAttributes) {
     // @ts-expect-error TS learn to iterate!
     offset[offsetAttributes[attr]] += parseInt(elemStyle[attr], 10) || 0;
   }
 
-  const docElem = doc.documentElement;
+  // get element box style
   if (typeof element.getBoundingClientRect !== 'undefined') {
     box = element.getBoundingClientRect();
   }
-
+  
+  const docElem = doc.documentElement;
   const scrollLeftTop = getScrollLeftTop(element);
 
   return {

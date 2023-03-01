@@ -360,12 +360,10 @@ export class StaticCanvas<
       /* _DEV_MODE_END_ */
       obj.canvas.remove(obj);
     }
-    // CURRENT
-    // NOTE: obj._set || this._set?
     obj._set('canvas', this);
     obj.setCoords();
-    this.fire('object:added', { target: obj }); // fire object event
-    obj.fire('added', { target: this }); // fire canvas event
+    this.fire('object:added', { target: obj }); // canvas fire object event
+    obj.fire('added', { target: this }); // obj fire event
   }
 
   _onObjectRemoved(obj: FabricObject) {
@@ -507,12 +505,14 @@ export class StaticCanvas<
       let cssValue = `${value}`;
 
       if (!cssOnly) {
+        // set canvas.width, canvas.heigth
         this._setBackstoreDimension(prop as keyof TSize, value);
         cssValue += 'px';
         this.hasLostContext = true;
       }
 
       if (!backstoreOnly) {
+        // set canvas.style.width, canvas.style.heigth
         this._setCssDimension(prop as keyof TSize, cssValue);
       }
     });
@@ -577,7 +577,8 @@ export class StaticCanvas<
   /**
    * Sets viewport transformation of this canvas instance
    * @param {Array} vpt a Canvas 2D API transform matrix
-   */
+  */
+  // CURRENT
   setViewportTransform(vpt: TMat2D) {
     const backgroundObject = this.backgroundImage,
       overlayObject = this.overlayImage,
@@ -586,7 +587,7 @@ export class StaticCanvas<
     this.viewportTransform = vpt;
     for (let i = 0; i < len; i++) {
       const object = this._objects[i];
-      object.group || object.setCoords();
+      object.group || object.setCoords(); // if not group should re calc coords
     }
     if (backgroundObject) {
       backgroundObject.setCoords();
@@ -731,6 +732,7 @@ export class StaticCanvas<
    * @return {Object} points.tl
    * @chainable
    */
+  // UNDONE
   calcViewportBoundaries(): TCornerPoint {
     const width = this.width,
       height = this.height,
@@ -747,9 +749,9 @@ export class StaticCanvas<
       bl: new Point(min.x, max.y),
       br: max,
     });
-  }
+  }cancelRequestedRender
 
-  cancelRequestedRender() {
+  () {
     if (this.nextRenderHandle) {
       cancelAnimFrame(this.nextRenderHandle);
       this.nextRenderHandle = 0;
