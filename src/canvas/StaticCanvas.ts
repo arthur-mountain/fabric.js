@@ -607,6 +607,7 @@ export class StaticCanvas<
    * @param {Point} point to zoom with respect to
    * @param {Number} value to set zoom to, less than 1 zooms out
    */
+  // UNDONE: 根據特定點縮放
   zoomToPoint(point: Point, value: number) {
     // TODO: just change the scale, preserve other transformations
     const before = point,
@@ -732,13 +733,12 @@ export class StaticCanvas<
    * @return {Object} points.tl
    * @chainable
    */
-  // UNDONE
   calcViewportBoundaries(): TCornerPoint {
     const width = this.width,
       height = this.height,
       iVpt = invertTransform(this.viewportTransform),
-      a = transformPoint({ x: 0, y: 0 }, iVpt),
-      b = transformPoint({ x: width, y: height }, iVpt),
+      a = transformPoint({ x: 0, y: 0 }, iVpt), // tl 為最小值 x:0,y:0
+      b = transformPoint({ x: width, y: height }, iVpt), // br 為最大值 x:width,y:height
       // we don't support vpt flipping
       // but the code is robust enough to mostly work with flipping
       min = a.min(b),
@@ -749,9 +749,8 @@ export class StaticCanvas<
       bl: new Point(min.x, max.y),
       br: max,
     });
-  }cancelRequestedRender
-
-  () {
+  }
+  cancelRequestedRender() {
     if (this.nextRenderHandle) {
       cancelAnimFrame(this.nextRenderHandle);
       this.nextRenderHandle = 0;
